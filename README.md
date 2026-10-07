@@ -10,7 +10,7 @@
       ░  ░                      ░ ░                 ░  ░ ░
                                                        ░ ░
 
-                 dissect your debian system
+                 dissect your Debian system
 
                     with love, by chai <3
 
