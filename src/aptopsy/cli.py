@@ -5,6 +5,17 @@ from aptopsy.collectors.package import (
     package_exists,
 )
 
+from aptopsy.ui import (
+    bold,
+    cyan,
+    green,
+    magenta,
+    red,
+    yellow,
+    print_home,
+)
+
+from aptopsy.collectors.repository import get_repository_info
 
 def format_size(kb: int | None) -> str:
     if kb is None:
@@ -18,11 +29,11 @@ def format_size(kb: int | None) -> str:
 
 def print_package(info) -> None:
     print()
-    print(f"APTOSY — {info.name}")
+    print(f"{cyan('APTOPSY')} - {bold(info.name)}")
     print("─" * 48)
 
     print()
-    print("Package")
+    print(f"{bold('Package')}")
     print(f"  Name          {info.name}")
     print(f"  Version       {info.version}")
     print(f"  Architecture  {info.architecture}")
@@ -38,7 +49,7 @@ def print_package(info) -> None:
     print(f"  Size          {format_size(info.installed_size_kb)}")
 
     print()
-    print("Dependencies")
+    print(f"{bold('Dependencies')}")
 
     if info.dependencies:
         for dependency in info.dependencies:
@@ -47,7 +58,7 @@ def print_package(info) -> None:
         print("  none")
 
     print()
-    print("Reverse dependencies")
+    print(f"{bold('Reverse dependencies')}")
 
     if info.reverse_dependencies:
         for dependency in info.reverse_dependencies:
@@ -56,7 +67,7 @@ def print_package(info) -> None:
         print("  none")
 
     print()
-    print("Configuration files")
+    print(f"{bold('Configuration files')}")
 
     if info.config_files:
         for path in info.config_files:
@@ -65,17 +76,17 @@ def print_package(info) -> None:
         print("  none")
 
     print()
-    print("Integrity")
+    print(f"{bold('Integrity')}")
 
     if not info.integrity_issues:
-        print("  ✓ No differences reported by dpkg")
+        print(f"  {green('✓')} No differences reported by dpkg")
     else:
         for issue in info.integrity_issues:
             config_marker = " [config]" if issue.is_config else ""
 
             if issue.missing:
                 print(
-                    f"  ✗ MISSING   {issue.path}"
+                    f"  {red('✗ MISSING')}   {issue.path}"
                     f"{config_marker}"
                 )
 
@@ -84,7 +95,7 @@ def print_package(info) -> None:
 
             elif issue.content_changed:
                 print(
-                    f"  ! MODIFIED  {issue.path}"
+                    f"  {yellow('! MODIFIED')}  {issue.path}"
                     f"{config_marker}"
                 )
 
@@ -118,6 +129,44 @@ def print_package(info) -> None:
 
     print()
 
+def print_repo(info) -> None:
+    print()
+    print(bold("Repository"))
+
+    print(
+        f"  Installed       "
+        f"{info.installed or 'unknown'}"
+    )
+
+    print(
+        f"  Candidate       "
+        f"{info.candidate or 'unknown'}"
+    )
+
+    print(
+        f"  Priority        "
+        f"{info.priority if info.priority is not None else 'unknown'}"
+    )
+
+    print(
+        f"  Suite         "
+        f"{info.suite or 'unknown'}"
+    )
+
+    print(
+        f"  Component     "
+        f"{info.component or 'unknown'}"
+    )
+
+    print(
+        f"  Architecture  "
+        f"{info.architecture or 'unknown'}"
+    )
+
+    print(
+        f"  Source        "
+        f"{info.source or 'local / unknown'}"
+    )
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -127,6 +176,7 @@ def main() -> None:
 
     parser.add_argument(
         "package",
+        nargs="?",
         help="package to inspect",
     )
 
@@ -136,7 +186,17 @@ def main() -> None:
         version="aptopsy 0.1.0",
     )
 
+    parser.add_argument(
+        "--repo",
+        action="store_true",
+        help="show repository and candidate version info",
+    )
+
     args = parser.parse_args()
+
+    if args.package is None:
+        print_home()
+        return
 
     if not package_exists(args.package):
         parser.error(
@@ -150,6 +210,13 @@ def main() -> None:
 
     print_package(info)
 
+    if args.repo:
+        try:
+            repo = get_repository_info(args.package)
+        except RuntimeError as error:
+            parser.error(str(error))
+
+        print_repo(repo)
 
 if __name__ == "__main__":
     main()

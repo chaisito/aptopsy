@@ -5,10 +5,12 @@ src/aptopsy/__init__.py
 src/aptopsy/__main__.py
 src/aptopsy/cli.py
 src/aptopsy/models.py
+src/aptopsy/ui.py
 src/aptopsy.egg-info/PKG-INFO
 src/aptopsy.egg-info/SOURCES.txt
 src/aptopsy.egg-info/dependency_links.txt
 src/aptopsy.egg-info/entry_points.txt
 src/aptopsy.egg-info/top_level.txt
 src/aptopsy/collectors/__init__.py
+src/aptopsy/collectors/integrity.py
 src/aptopsy/collectors/package.py

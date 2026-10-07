@@ -25,6 +25,16 @@ class IntegrityIssue:
             and self.flags[1] == "M"
         )
 
+@dataclass
+class RepositoryInfo:
+    installed: str | None = None
+    candidate: str | None = None
+    priority: int | None = None
+
+    source: str | None = None
+    suite: str | None = None
+    component: str | None = None
+    architecture: str | None = None
 
 @dataclass
 class PackageInfo:
