@@ -14,7 +14,7 @@
 
                     with love, by chai <3
 
-```
+
 Usage
   aptopsy <package>
   aptopsy --help
@@ -22,3 +22,4 @@ Usage
 
 Example
   aptopsy bash
+```
