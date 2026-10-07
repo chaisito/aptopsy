@@ -18,7 +18,7 @@ def format_size(kb: int | None) -> str:
 
 def print_package(info) -> None:
     print()
-    print(f"APTOPSY — {info.name}")
+    print(f"APTOSY — {info.name}")
     print("─" * 48)
 
     print()
@@ -65,6 +65,54 @@ def print_package(info) -> None:
         print("  none")
 
     print()
+    print("Integrity")
+
+    if not info.integrity_issues:
+        print("  ✓ No differences reported by dpkg")
+    else:
+        for issue in info.integrity_issues:
+            config_marker = " [config]" if issue.is_config else ""
+
+            if issue.missing:
+                print(
+                    f"  ✗ MISSING   {issue.path}"
+                    f"{config_marker}"
+                )
+
+                if issue.error:
+                    print(f"              {issue.error}")
+
+            elif issue.content_changed:
+                print(
+                    f"  ! MODIFIED  {issue.path}"
+                    f"{config_marker}"
+                )
+
+            elif issue.mode_check_failed:
+                print(
+                    f"  ! MODE/TYPE {issue.path}"
+                    f"{config_marker}"
+                )
+
+            else:
+                print(
+                    f"  ! CHANGED   {issue.path}"
+                    f" [{issue.flags}]"
+                    f"{config_marker}"
+                )
+
+        count = len(info.integrity_issues)
+
+        word = (
+            "discrepancy"
+            if count == 1
+            else "discrepancies"
+        )
+
+        print()
+        print(f"  {count} integrity {word} detected")
+
+    print()
     print("Files")
     print(f"  {len(info.files)} installed files")
 
@@ -101,3 +149,7 @@ def main() -> None:
         parser.error(str(error))
 
     print_package(info)
+
+
+if __name__ == "__main__":
+    main()

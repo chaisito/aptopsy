@@ -1,7 +1,7 @@
 import subprocess
 
 from aptopsy.models import PackageInfo
-
+from aptopsy.collectors.integrity import get_integrity_issues
 
 def run_command(*args: str) -> str:
     result = subprocess.run(
@@ -151,5 +151,6 @@ def collect_package(package: str) -> PackageInfo:
     info.reverse_dependencies = get_reverse_dependencies(package)
     info.files = get_files(package)
     info.config_files = get_config_files(package)
+    info.integrity_issues = get_integrity_issues(package)
 
     return info
