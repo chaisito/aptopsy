@@ -1,0 +1,2 @@
+[console_scripts]
+aptopsy = aptopsy.cli:main

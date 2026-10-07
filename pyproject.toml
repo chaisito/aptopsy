@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aptopsy"
+version = "0.1.0"
+description = "Inspect and explain Debian packages state and system changes"
+requires-python = ">=3.11"
+license = { text = "GPL-3.0-or-later"}
+
+[project.scripts]
+aptopsy = "aptopsy.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
