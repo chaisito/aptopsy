@@ -14,3 +14,5 @@ src/aptopsy.egg-info/top_level.txt
 src/aptopsy/collectors/__init__.py
 src/aptopsy/collectors/integrity.py
 src/aptopsy/collectors/package.py
+src/aptopsy/collectors/repository.py
+src/aptopsy/collectors/why.py

@@ -12,10 +12,17 @@ from aptopsy.ui import (
     magenta,
     red,
     yellow,
+    cream,
+    blue,
+    dim,
     print_home,
 )
 
 from aptopsy.collectors.repository import get_repository_info
+from aptopsy.collectors.why import collect_why
+
+def print_field(label: str, value: str, width: int = 14) -> None:
+    print(f"  {label:<{width}}{value}")
 
 def format_size(kb: int | None) -> str:
     if kb is None:
@@ -29,11 +36,11 @@ def format_size(kb: int | None) -> str:
 
 def print_package(info) -> None:
     print()
-    print(f"{cyan('APTOPSY')} - {bold(info.name)}")
-    print("─" * 48)
+    print(f"{blue(info.name)} {dim('@')} {cyan('APTOPSY')}")
+    print("─" * 24)
 
     print()
-    print(f"{bold('Package')}")
+    print(f"{cream('Package')}")
     print(f"  Name          {info.name}")
     print(f"  Version       {info.version}")
     print(f"  Architecture  {info.architecture}")
@@ -49,7 +56,7 @@ def print_package(info) -> None:
     print(f"  Size          {format_size(info.installed_size_kb)}")
 
     print()
-    print(f"{bold('Dependencies')}")
+    print(f"{cream('Dependencies')}")
 
     if info.dependencies:
         for dependency in info.dependencies:
@@ -58,7 +65,7 @@ def print_package(info) -> None:
         print("  none")
 
     print()
-    print(f"{bold('Reverse dependencies')}")
+    print(f"{cream('Required by')}")
 
     if info.reverse_dependencies:
         for dependency in info.reverse_dependencies:
@@ -67,7 +74,7 @@ def print_package(info) -> None:
         print("  none")
 
     print()
-    print(f"{bold('Configuration files')}")
+    print(f"{cream('Configuration files')}")
 
     if info.config_files:
         for path in info.config_files:
@@ -76,7 +83,7 @@ def print_package(info) -> None:
         print("  none")
 
     print()
-    print(f"{bold('Integrity')}")
+    print(f"{cream('Integrity')}")
 
     if not info.integrity_issues:
         print(f"  {green('✓')} No differences reported by dpkg")
@@ -124,14 +131,12 @@ def print_package(info) -> None:
         print(f"  {count} integrity {word} detected")
 
     print()
-    print("Files")
+    print(cream("Files"))
     print(f"  {len(info.files)} installed files")
-
-    print()
 
 def print_repo(info) -> None:
     print()
-    print(bold("Repository"))
+    print(cream("Repository"))
 
     print(
         f"  Installed       "
@@ -168,6 +173,73 @@ def print_repo(info) -> None:
         f"{info.source or 'local / unknown'}"
     )
 
+def print_why(info) -> None:
+    print()
+    print(cream("Why"))
+
+    if info.install_type == "manual":
+        print_field("Mark", green("manual"))
+        print_field(
+            "Reason",
+            "explicitly installed or marked manual",
+        )
+
+    elif info.install_type == "automatic":
+        print_field("Mark", yellow("automatic"))
+        print_field(
+            "Reason",
+            "installed as a dependency",
+        )
+
+    else:
+        print_field("Mark", "unknown")
+        print_field(
+            "Reason",
+            "APT installation state unavailable",
+        )
+
+    print_field(
+        "First seen",
+        info.install_date or "not available in dpkg logs",
+    )
+
+    if info.install_type == "manual":
+        print()
+        print(
+            f"{green('→')} APT currently treats this package "
+            "as explicitly installed."
+        )
+
+    elif info.manual_paths:
+        print()
+        print(cream("Dependency path"))
+
+        for index, path in enumerate(info.manual_paths):
+            if index > 0:
+                print()
+
+            for depth, package in enumerate(path):
+                indent = "    " + ("    " * depth)
+
+                if depth == 0:
+                    print(f"    {package}")
+                elif depth == len(path) - 1:
+                    print(
+                        f"{indent}└── {package} "
+                        f"{green('[manual]')}"
+                    )
+                else:
+                    print(
+                        f"{indent}└── {package}"
+                    )
+
+    elif info.install_type == "automatic":
+        print()
+        print(
+            f"  {yellow('!')} No path to a manually installed "
+            "package was found."
+        )
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="aptopsy",
@@ -190,6 +262,12 @@ def main() -> None:
         "--repo",
         action="store_true",
         help="show repository and candidate version info",
+    )
+
+    parser.add_argument(
+        "--why",
+        action="store_true",
+        help="explain why a package is installed",
     )
 
     args = parser.parse_args()
@@ -217,6 +295,10 @@ def main() -> None:
             parser.error(str(error))
 
         print_repo(repo)
+
+    if args.why:
+        why = collect_why(args.package)
+        print_why(why)
 
 if __name__ == "__main__":
     main()

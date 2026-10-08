@@ -37,6 +37,15 @@ class RepositoryInfo:
     architecture: str | None = None
 
 @dataclass
+class WhyInfo:
+    package: str
+    install_type: str
+    install_date: str
+
+    required_by: list[str] = field(default_factory=list)
+    manual_paths: list[list[str]] = field(default_factory=list)
+
+@dataclass
 class PackageInfo:
     name: str
     version: str | None = None

@@ -23,6 +23,8 @@ def color(code: str, text: str) -> str:
 def cyan(text: str) -> str:
     return color("96", text)
 
+def blue(text: str) -> str:
+    return color("94", text)
 
 def magenta(text: str) -> str:
     return color("95", text)
@@ -35,6 +37,8 @@ def green(text: str) -> str:
 def yellow(text: str) -> str:
     return color("93", text)
 
+def cream(text: str) -> str:
+    return color("38;2;255;253;208", text)
 
 def red(text: str) -> str:
     return color("91", text)
